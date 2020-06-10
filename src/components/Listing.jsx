@@ -2,16 +2,21 @@ import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 function Listing({ items }) {
-  console.log(items[0])
-
   // Update the page's title:
   useEffect(() => {
     document.title = 'Etsy Listing React Component'
   })
 
-  // Provide shortened title, if needed:
+  // Provide shortened title, if needed,
+  // and escape Unicode in titles escaped by Webpack
+  // to avoid dangerouslySetInnerHTML or extra plugins:
+  const ANSCII_QUOT = '\u0022'
+  const ASCII_APOST = '\u0027'
   const shortTitle = (title) => {
-    return title.length > 50 ? title.slice(1, 51) + '...' : title
+    title = title
+      .replace(/&quot;/gi, ANSCII_QUOT)
+      .replace(/&#39;/gi, ASCII_APOST)
+    return title.length > 50 ? title.slice(0, 51) + '...' : title
   }
 
   // Provide dynamic currency format:
@@ -54,14 +59,16 @@ function Listing({ items }) {
             <li key={item.listing_id} className="item">
               <div className="item-image">
                 <a href={item.url}>
-                  <img
-                    src="https://i.etsystatic.com/10222074/d/il/06a8b0/2273087462/il_340x270.2273087462_rqf4.jpg"
-                    alt={item.title}
-                  />
+                  <img src={item.MainImage.url_570xN} alt={item.title} />
                 </a>
               </div>
               <div className="item-details">
                 <p className="item-title">{shortTitle(item.title)}</p>
+                {/* <p
+                  className="item-title"
+                  dangerouslySetInnerHTML={{
+                    __html: shortTitle(item.title),
+                  }}></p> */}
                 <p className="item-price">
                   {currency(item.currency_code, item.price)}
                 </p>
